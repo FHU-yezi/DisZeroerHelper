@@ -44,10 +44,9 @@ with st.sidebar.form("参数设定"):
     submitted = st.form_submit_button("提交并查找")
     
     comments_limit = st.slider("评论数量上限", min_value=1, max_value=5)
-    likes_limit = st.slider("点赞数量上限", min_value=1, max_value=5)
-    max_result_count = st.number_input("最大结果数量", min_value=20, max_value=100)
-    
+    likes_limit = st.slider("点赞数量上限", min_value=1, max_value=5)    
     chosen_collections = st.multiselect("专题选择", options=list(collections.keys()))
+    max_result_count = st.number_input("最大结果数量", min_value=20, max_value=100)
 
 st.sidebar.write("版本：V", __version__)
 
@@ -75,4 +74,3 @@ if submitted == True:
     for index in filtered_df.index:
         article = filtered_df.loc[index]
         st.write("文章 ID：", article["nid"], "，文章标题：", article["title"], "符合您的要求！")
-
