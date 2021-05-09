@@ -4,7 +4,7 @@ import JianshuResearchTools as jrt
 import pandas as pd
 import streamlit as st
 
-__version__ = "1.0.0"
+__version__ = "0.1.0"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8"
@@ -16,7 +16,7 @@ except NameError:
 
 def GetCollectionArticlesDataFrame(collection_url, pages):
     df = pd.DataFrame(columns=["title", "nid", "likes_count", "time", "commentable", 
-                               "paid", "topped", "comments_count", "fp_amount", "rewards_count"])
+                               "paid", "topped", "comments_count", "fp_amount", "rewards_count", "slug"])
     for page in range(pages):
         page += 1  # 还记得 range 从 0 开始不？
         result = jrt.GetCollectionArticlesList(collection_url, page)
@@ -46,7 +46,7 @@ with st.sidebar.form("参数设定"):
     comments_limit = st.slider("评论数量上限", min_value=1, max_value=5)
     likes_limit = st.slider("点赞数量上限", min_value=1, max_value=5)    
     chosen_collections = st.multiselect("专题选择", options=list(collections.keys()))
-    max_result_count = st.number_input("最大结果数量", min_value=20, max_value=100)
+    max_result_count = st.number_input("输出结果数量", min_value=20, max_value=100)
 
 st.sidebar.write("版本：V", __version__)
 
@@ -62,7 +62,7 @@ if submitted == True:
             chosen_collections_urls.append(collections[chosen_collection])
         
     article_df = pd.DataFrame(columns=["title", "nid", "likes_count", "time", "commentable", 
-                               "paid", "topped", "comments_count", "fp_amount", "rewards_count"])
+                               "paid", "topped", "comments_count", "fp_amount", "rewards_count", "slug"])
     for chosen_collection_url in chosen_collections_urls:
         result = GetCollectionArticlesDataFrame(chosen_collection_url, 7)  # 默认获取 7 页
         for index in result.index:
@@ -73,4 +73,10 @@ if submitted == True:
     
     for index in filtered_df.index:
         article = filtered_df.loc[index]
-        st.write("文章 ID：", article["nid"], "，文章标题：", article["title"], "符合您的要求！")
+        with st.beta_expander("【" + str(index) + "】标题：" + article["title"]):
+            article_url = "https://www.jianshu.com/p/" + article["slug"]
+            
+            st.write("文章链接：" + article_url)
+            st.write("发布时间：" + str(article["time"]))
+            st.write("点赞数：" + str(article["likes_count"]))
+            st.write("评论数：" + str(article["comments_count"]))
