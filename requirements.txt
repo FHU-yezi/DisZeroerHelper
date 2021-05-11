@@ -1,4 +1,4 @@
-JianshuResearchTools==1.1.1
+JianshuResearchTools==1.1.2
 pandas==1.2.4
 requests==2.25.1
 streamlit==0.81.1
