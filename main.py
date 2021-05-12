@@ -4,7 +4,7 @@ import JianshuResearchTools as jrt
 import pandas as pd
 import streamlit as st
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8"
@@ -74,12 +74,16 @@ if submitted == True:
     
     filtered_df = FilterArticles(article_df, likes_limit, comments_limit)
     
-    for index in filtered_df.index:
-        article = filtered_df.loc[index]
-        with st.beta_expander("【" + str(index) + "】标题：" + article["title"]):
+    Cutted_df = filtered_df[0:max_result_count]
+    
+    count = 1
+    for index in Cutted_df.index:
+        article = Cutted_df.loc[index]
+        with st.beta_expander("【" + str(count) + "】标题：" + article["title"]):
             article_url = "https://www.jianshu.com/p/" + article["slug"]
             
             st.write("文章链接：" + article_url)
             st.write("发布时间：" + str(article["time"]))
             st.write("点赞数：" + str(article["likes_count"]))
             st.write("评论数：" + str(article["comments_count"]))
+        count += 1
