@@ -4,13 +4,13 @@ import JianshuResearchTools as jrt
 import pandas as pd
 import streamlit as st
 
-__version__ = "0.1.1"
+__version__ = "0.1.3"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8"
 }
 try:
-    has_data  # 只要提交过一次，设为 False 的逻辑就不会被触发
+    has_data # 只要提交过一次，设为 False 的逻辑就不会被触发
 except NameError:
     has_data = False
 
@@ -35,10 +35,13 @@ def FilterArticles(article_df, likes_limit, comments_limit):
 
 st.title("简书消零派辅助工具")
 
-if has_data == False:
-    st.write("本工具为辅助简书消零派寻找符合条件的文章而开发。")
-    st.write("请展开侧边栏，调整设置并获取文章列表。")
-    st.write("工作原理：在各大专题中查找新发布且赞、评少于一定数量的文章，展示到界面上。")
+a = st.markdown("""
+本工具为辅助简书消零派寻找符合条件的文章而开发。
+                
+请展开侧边栏，调整设置并获取文章列表。
+                
+工作原理：在各大专题中查找新发布且赞、评少于一定数量的文章，展示到界面上。
+""")
 
 with st.sidebar.form("参数设定"):
     submitted = st.form_submit_button("提交并查找")
@@ -71,12 +74,16 @@ if submitted == True:
     
     filtered_df = FilterArticles(article_df, likes_limit, comments_limit)
     
-    for index in filtered_df.index:
-        article = filtered_df.loc[index]
-        with st.beta_expander("【" + str(index) + "】标题：" + article["title"]):
+    Cutted_df = filtered_df[0:max_result_count]
+    
+    count = 1
+    for index in Cutted_df.index:
+        article = Cutted_df.loc[index]
+        with st.beta_expander("【" + str(count) + "】标题：" + article["title"]):
             article_url = "https://www.jianshu.com/p/" + article["slug"]
             
             st.write("文章链接：" + article_url)
             st.write("发布时间：" + str(article["time"]))
             st.write("点赞数：" + str(article["likes_count"]))
             st.write("评论数：" + str(article["comments_count"]))
+        count += 1
