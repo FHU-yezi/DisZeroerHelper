@@ -4,7 +4,7 @@ import JianshuResearchTools as jrt
 import pandas as pd
 import streamlit as st
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8", 
