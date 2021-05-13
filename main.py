@@ -4,7 +4,7 @@ import JianshuResearchTools as jrt
 import pandas as pd
 import streamlit as st
 
-__version__ = "0.1.3"
+__version__ = "0.2.1"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8"
@@ -28,9 +28,24 @@ def GetCollectionArticlesDataFrame(collection_url, pages):
             df.loc[len(df.index)] = article  # 插入数据
     return df
 
-def FilterArticles(article_df, likes_limit, comments_limit):
+def FilterArticlesByLikesCount(article_df, likes_limit):
     filtered_df = article_df[article_df["likes_count"] <= likes_limit]
-    filtered_df = filtered_df[filtered_df["comments_count"] <= comments_limit]
+    return filtered_df
+
+def FilterArticlesByCommentsCount(article_df, comments_limit):
+    filtered_df = article_df[article_df["likes_count"] <= likes_limit]
+    return filtered_df
+
+def FilterCommentableOnly(article_df):
+    filtered_df = article_df[article_df["commentable"] == True]
+    return filtered_df
+
+def FilterFreeOnly(article_df):
+    filtered_df = article_df[article_df["paid"] == False]
+    return filtered_df
+
+def FilterByFPAmount(article_df, fp_limit):
+    filtered_df = article_df[article_df["fp_amount"] <= fp_limit]
     return filtered_df
 
 st.title("简书消零派辅助工具")
@@ -51,6 +66,20 @@ with st.sidebar.form("参数设定"):
     chosen_collections = st.multiselect("专题选择", options=list(collections.keys()))
     max_result_count = st.number_input("输出结果数量", min_value=20, max_value=100)
 
+with st.sidebar.beta_expander("展开额外选项"):
+    # ! 这个功能目前只是摆设，还没有实现，所以不展示出来
+    # enable_title_stopword = st.checkbox("开启标题停用词")
+    # if enable_title_stopword == True:
+    #     title_stopword = st.text_input("标题停用词", help="请以英文逗号分隔")
+    # else:
+    #     title_stopword = None
+    commentable_only = st.checkbox("仅展示可以评论的文章")
+    free_only = st.checkbox("不展示需要付费阅读的文章")
+    enable_fp_amount_limit = st.checkbox("启用文章获钻数量限制")
+    if enable_fp_amount_limit == True:
+        fp_amount_limit = st.number_input("请输入最大获钻量", value=0.10, min_value=0.10, max_value=30.00)
+    else:
+        fp_amount_limit = None
 st.sidebar.write("版本：V", __version__)
 
 st.sidebar.write("Powered By JRT")
@@ -72,7 +101,14 @@ if submitted == True:
             article = result.loc[index]
             article_df.loc[len(article_df.index)] = article
     
-    filtered_df = FilterArticles(article_df, likes_limit, comments_limit)
+    filtered_df = FilterArticlesByLikesCount(article_df, likes_limit)
+    filtered_df = FilterArticlesByCommentsCount(filtered_df, comments_limit)
+    if commentable_only == True:
+        filtered_df = FilterCommentableOnly(filtered_df)
+    if free_only == True:
+        filtered_df = FilterFreeOnly(filtered_df)
+    if enable_fp_amount_limit == True:
+        filtered_df = FilterByFPAmount(filtered_df, fp_amount_limit)
     
     Cutted_df = filtered_df[0:max_result_count]
     
