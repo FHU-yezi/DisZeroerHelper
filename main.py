@@ -4,7 +4,7 @@ import JianshuResearchTools as jrt
 import pandas as pd
 import streamlit as st
 
-__version__ = "0.2.2"
+__version__ = "0.3.0"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8", 
@@ -74,7 +74,8 @@ with st.sidebar.beta_expander("展开额外选项"):
     #     title_stopword = st.text_input("标题停用词", help="请以英文逗号分隔")
     # else:
     #     title_stopword = None
-    commentable_only = st.checkbox("仅展示可以评论的文章")
+    enable_url_scheme = st.checkbox("开启 URL Scheme 跳转", help="开启后文章详情中会出现一个跳转链接，可以直接跳转到简书 App 中阅读对应文章")
+    commentable_only = st.checkbox("仅展示可以评论的文章", value=True)
     free_only = st.checkbox("不展示需要付费阅读的文章")
     enable_fp_amount_limit = st.checkbox("启用文章获钻数量限制")
     if enable_fp_amount_limit == True:
@@ -124,7 +125,8 @@ if submitted == True:
         article = cutted_df.loc[index]
         with st.beta_expander("【" + str(count) + "】" + article["title"]):
             article_url = "https://www.jianshu.com/p/" + article["slug"]
-            
+            if enable_url_scheme == True:
+                st.markdown("[点击在 App 中阅读文章](" + jrt.GetArticlePageURLScheme(article_url) + ")")
             st.write("文章链接：" + article_url)
             st.write("发布时间：" + str(article["time"]))
             st.write("来源：", article["from_collection"])
