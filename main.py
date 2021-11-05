@@ -7,7 +7,7 @@ from pywebio import pin, start_server
 from pywebio.input import *
 from pywebio.output import *
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8", 
@@ -80,7 +80,7 @@ def ShowResult(df):
                     put_link("点击跳转到简书 App（手机端）", url=ArticleUrlToArticleUrlScheme(ArticleSlugToArticleUrl(item.aslug)))
                     ])
             else:
-                put_collapse(f"文章标题：{item.title}", put_markdown(content, lstrip=True))
+                put_collapse(f"{item.title}", put_markdown(content, lstrip=True))
     
 def main_logic():    
     if CheckData() == False:
