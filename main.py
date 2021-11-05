@@ -7,7 +7,7 @@ from pywebio import pin, start_server
 from pywebio.input import *
 from pywebio.output import *
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8", 
@@ -101,7 +101,7 @@ def main_show():
 
     本工具为辅助简书消零派寻找符合条件的文章而开发。
                     
-    请展开侧边栏，调整设置并获取文章列表。
+    请调整下方设置并获取文章列表。
                     
     工作原理：在您选定的专题中查找新发布且赞、评少于一定数量的文章，进行处理后展示到页面上。
     
