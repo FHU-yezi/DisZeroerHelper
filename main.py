@@ -1,13 +1,15 @@
 from JianshuResearchTools.collection import GetCollectionArticlesInfo
-from JianshuResearchTools.convert import (ArticleSlugToArticleUrl,
-                                          ArticleUrlToArticleUrlScheme,
-                                          UserSlugToUserUrl)
+from JianshuResearchTools.convert import (ArticleSlugToArticleUrl,ArticleUrlToArticleUrlScheme,
+                                       UserSlugToUserUrl)
 from pandas import DataFrame
 from pywebio import pin, start_server
 from pywebio.input import *
 from pywebio.output import *
+from pywebio.session import run_js
 
-__version__ = "1.0.2"
+import asyncio
+
+__version__ = "1.0.3"
 
 collections = {
     "简友广场": "https://www.jianshu.com/c/7ecac177f5a8", 
@@ -15,24 +17,32 @@ collections = {
     "想法": "https://www.jianshu.com/c/qQB2Zn"
 }
 
-def CheckData():
-    all_data_right = True
+#结果依次展现 避免多个错误展示阻挡屏幕
+async def CheckData():
     if not 1 <= pin.pin["likes_limit"] <= 10:
-        toast("点赞数上限必须在 1 到 5 之间", color="error")
-        all_data_right = False
-    if not 1 <= pin.pin["comments_limit"] <= 10:
-        toast("评论数上限必须在 1 到 5 之间", color="error")
-        all_data_right = False
+        toast("点赞数上限必须在 1 到 10 之间", color="error")
+        return False
+    try:
+        if not 1 <= pin.pin["comments_limit"] <= 10:
+            toast("评论数上限必须在 1 到 10 之间", color="error")
+            return False
+    except:
+        toast("请不要使用自然常数e", color="error")
+        return False
     if not 20 <= pin.pin["max_result_count"] <= 100:
         toast("结果数量必须在 20 到 100 之间", color="error")
-        all_data_right = False
+        return False
     if not pin.pin["chosen_collections"]:
         toast("请至少选择一个专题", color="error")
-        all_data_right = False
-    if not (pin.pin["fp_amount_limit"] == 0 or 0.1 <= pin.pin["fp_amount_limit"] <= 30.0):
-        toast("文章获钻量限制必须在 0.1 到 30.0 之间", color="error")
-        all_data_right = False
-    return all_data_right
+        return False
+    try:
+        if not (pin.pin["fp_amount_limit"] == 0 or 0.1 <= pin.pin["fp_amount_limit"] <= 30.0):
+            toast("文章获钻量限制必须在 0.1 到 30.0 之间", color="error")
+            return False
+    except:
+        toast("您输入的文章获钻量限制的数据类型错误", color="error")
+        return False
+    return True
         
 def GetProcessedData():
     chosen_collections_urls = []
@@ -83,7 +93,7 @@ def ShowResult(df):
                 put_collapse(f"{item.title}", put_markdown(content, lstrip=True))
     
 def main_logic():    
-    if CheckData() == False:
+    if asyncio.run(CheckData()) == False:
         return  # 有数据填写错误，不运行后续逻辑
     df = GetProcessedData()
     toast("数据获取成功！", color="success")
@@ -105,8 +115,7 @@ def main_show():
                     
     工作原理：在您选定的专题中查找新发布且赞、评少于一定数量的文章，进行处理后展示到页面上。
     
-    Made with [JRT](https://github.com/FHU-yezi/JianshuResearchTools) and ♥
-    Version：{__version__}
+
     """, lstrip=True)  # 去除无用的空格
     
     put_markdown("---")  # 分割线
@@ -125,6 +134,22 @@ def main_show():
         ])
     ], size=r"3fr 1fr 3fr")
 
-    put_button("提交", color="success", onclick=main_logic)
+    put_buttons([dict(label='提交', value='Submit', color='success'),dict(label='重置', value='Clear', color='success')],
+                onclick=[main_logic,Clear])
+    
+    put_markdown("---")  
+    put_markdown(f"""
+
+    Made with [JRT](https://github.com/FHU-yezi/JianshuResearchTools) and ♥
+    **Application Version**：{__version__}
+    
+    """,lstrip=True)
+
+def Clear():
+    #清空所有文本框
+    pin.pin.likes_limit = 3
+    pin.pin.comments_limit = 3
+    pin.pin.max_result_count = 20
+    pin.pin.fp_amount_limit = 0
 
 start_server(main_show, port=8601)
